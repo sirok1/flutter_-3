@@ -67,6 +67,12 @@ class PageWrapperState extends State<PageWrapper> {
     });
   }
 
+  void _clearCart() {
+    setState(() {
+      _cart = [];
+    });
+  }
+
   void updateSelectedPageIndex(int index) {
     setState(() {
       _selectedPageIndex = index;
@@ -98,6 +104,7 @@ class PageWrapperState extends State<PageWrapper> {
         cart: _cart,
         addToCart: _addToCart,
         removeFromCart: _removeFromCart,
+        clearCart: _clearCart,
       ),
       AuthGate()
     ];
@@ -111,9 +118,11 @@ class PageWrapperState extends State<PageWrapper> {
               icon: Icon(Icons.favorite), label: "Отложенное"),
           BottomNavigationBarItem(
               icon: CartIcon(
-                  itemCount: _cart.isNotEmpty? _cart
-                      .map((position) => position.quantity)
-                      .reduce((a, b) => a + b) : 0),
+                  itemCount: _cart.isNotEmpty
+                      ? _cart
+                          .map((position) => position.quantity)
+                          .reduce((a, b) => a + b)
+                      : 0),
               label: "Корзина"),
           const BottomNavigationBarItem(
               icon: Icon(Icons.person), label: "Профиль")

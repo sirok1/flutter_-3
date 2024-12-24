@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_4/components/profile_text_field.dart';
+import 'package:flutter_4/models/order.dart';
 import 'package:flutter_4/pages/edit_profile_page.dart';
 import 'package:flutter_4/services/auth_service.dart';
 import 'package:flutter_4/models/user.dart';
+import 'package:flutter_4/services/api_service.dart';
+import 'package:flutter_4/pages/orders_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,13 +16,16 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final authService = AuthService();
+  final apiService = ApiService();
   late User _user = User('Loading...', '', '',
       'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fthumbs.dreamstime.com%2Fb%2Fdefault-profile-picture-avatar-photo-placeholder-vector-illustration-default-profile-picture-avatar-photo-placeholder-vector-189495158.jpg&f=1&nofb=1&ipt=5a3b8df2fbe61251fb5d0c178caf961f7fe07fce4bada9d2fc824089aa650a47&ipo=images');
+  List<Order> _orders = [];
 
   @override
   void initState() {
     super.initState();
     fetchUser();
+    fetchOrders();
   }
 
   void fetchUser() async {
@@ -32,6 +38,20 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Что-то пошло не так')));
+      }
+    }
+  }
+
+  void fetchOrders() async {
+    try {
+      final orders = await apiService.getOrders();
+      setState(() {
+        _orders = orders;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Не удалось загрузить заказы')));
       }
     }
   }
@@ -84,21 +104,30 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: ListView.builder(
                       itemCount: 2,
                       itemBuilder: (BuildContext context, int index) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ProfileTextField(
-                              title: ["Почта", "Телефон"][index],
-                              value: _user.getFieldByIndex(index),
-                              icon: [Icons.email, Icons.phone][index],
-                            ),
-                            const SizedBox(height: 16),
-                          ],
-                        );
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ProfileTextField(
+                                title: ["Почта", "Телефон"][index],
+                                value: _user.getFieldByIndex(index),
+                                icon: [Icons.email, Icons.phone][index],
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          );
                       },
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (ctx) => OrdersPage()),
+                  ),
+                  child: const Text('История заказов'),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
     );

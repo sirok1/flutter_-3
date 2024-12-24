@@ -1,22 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_4/models/cart_item.dart';
 import 'package:flutter_4/models/game.dart';
+import 'package:flutter_4/models/order.dart';
+import 'package:flutter_4/services/api_service.dart';
 
 class CartPage extends StatefulWidget {
   final List<CartItem> cart;
   final Function(Game) removeFromCart;
   final Function(Game) addToCart;
+  final Function() clearCart;
   const CartPage(
       {super.key,
       required this.cart,
       required this.removeFromCart,
-      required this.addToCart});
+      required this.addToCart,
+      required this.clearCart});
 
   @override
   State<StatefulWidget> createState() => _CartPage();
 }
 
 class _CartPage extends State<CartPage> {
+  final apiService = ApiService();
+
+  void createOrder() async {
+    try {
+      List<Order> orders = widget.cart.map((item) {
+        return Order(
+          id: UniqueKey().toString(),
+          productId: item.data.id,
+          quantity: item.quantity,
+          total: (item.data.price * item.quantity).toDouble(),
+          createdAt: DateTime.now(),
+        );
+      }).toList();
+
+      await apiService.createOrder(orders);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Покупка совершена"),
+        ),
+      );
+      widget.clearCart();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Ошибка при создании заказа: $e"),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -171,12 +206,7 @@ class _CartPage extends State<CartPage> {
                       width: MediaQuery.of(context).size.width,
                       child: FloatingActionButton.extended(
                         backgroundColor: Colors.blueGrey,
-                        onPressed: () =>
-                            ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Покупка совершена"),
-                          ),
-                        ),
+                        onPressed: createOrder,
                         label: Text(
                           'Оплатить ${widget.cart.map((position) => position.data.price * (position.quantity > 0 ? position.quantity : 1)).reduce((a, b) => a + b).toString()} руб.',
                           style: const TextStyle(color: Colors.white),

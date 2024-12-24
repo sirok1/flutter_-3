@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_4/models/game.dart';
+import 'package:flutter_4/models/order.dart';
 
 class ApiService {
   final Dio _dio = Dio();
@@ -58,6 +59,45 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Error deleting game: $e');
+    }
+  }
+
+  Future<List<Order>> getOrders() async {
+    try {
+      final response = await _dio.get('$baseurl/orders');
+      if (response.statusCode == 200) {
+        if (response.data == null) {
+          return [];
+        }
+        List<Order> orders = (response.data as List)
+            .map((order) => Order.fromJson(order))
+            .toList();
+        return orders;
+      } else {
+        throw Exception('Failed to load orders');
+      }
+    } catch (e) {
+      throw Exception('Error fetching orders: $e');
+    }
+  }
+
+  Future<List<Order>> createOrder(List<Order> orders) async {
+    try {
+      final test = orders.map((order) => order.toJson()).toList();
+      final response = await _dio.post(
+        '$baseurl/orders/create',
+        data: orders.map((order) => order.toJson()).toList(),
+      );
+      if (response.statusCode == 200) {
+        List<Order> newOrders = (response.data as List)
+            .map((order) => Order.fromJson(order))
+            .toList();
+        return newOrders;
+      } else {
+        throw Exception('Failed to create orders');
+      }
+    } catch (e) {
+      throw Exception('Error creating orders: $e');
     }
   }
 }

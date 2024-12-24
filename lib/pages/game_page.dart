@@ -99,7 +99,7 @@ class _GamePageState extends State<GamePage> {
               Container(
                   padding: const EdgeInsets.fromLTRB(8, 5, 8, 0),
                   child: Text(
-                    game.description,
+                    game.description.replaceAll('\\n', '\n'),
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 16),
                     softWrap: true,
