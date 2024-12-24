@@ -2,5 +2,7 @@
 
 ЭФБО-05-22
 
-https://github.com/user-attachments/assets/95ed876a-23ac-47b8-87c7-5002d7551a88
+
+https://github.com/user-attachments/assets/1a1e44d8-7e0c-4928-b239-bbc6477e6066
+
 
